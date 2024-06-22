@@ -93,33 +93,6 @@
         .guess-list li {
             padding: 3px;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            background-color: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .modal-header {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-        .modal-content {
-            font-size: 1.2em;
-        }
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 1.5em;
-            cursor: pointer;
-        }
         .side-container {
             display: flex;
             justify-content: space-between;
@@ -131,6 +104,9 @@
             background-color: #ffffff;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        #hint-text, #extra-hint-text {
+            font-size: 1.5em;
         }
     </style>
 </head>
@@ -277,10 +253,12 @@
 
                 if (attempts >= 20) {
                     document.getElementById('hint-text').innerText = wordOfTheDay.slice(-2);
+                    document.getElementById('hint-panel').style.display = 'block';
                 }
 
                 if (attempts >= 50) {
                     document.getElementById('extra-hint-text').innerText = definitionOfTheDay;
+                    document.getElementById('definition-panel').style.display = 'block';
                 }
 
                 document.getElementById('confetti').style.display = 'none';
@@ -288,14 +266,6 @@
                 document.getElementById('sad-face').style.display = 'none';
             }
             document.getElementById('guess-count').innerText = `Antall gjetninger: ${attempts}`;
-        }
-
-        function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
         }
 
         // Hent dagens ord når siden lastes
@@ -308,4 +278,3 @@
     <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
 </html>
-
