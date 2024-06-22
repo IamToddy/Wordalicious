@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordgjetting App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #confetti, #trophy {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ordgjetting App</h1>
+    <p id="date-time"></p>
+    <p>Gjett dagens ord:</p>
+    <input type="text" id="guess-input" placeholder="Skriv ditt gjetning her">
+    <button onclick="makeGuess()">Gjett</button>
+    <p id="feedback"></p>
+    <p id="last-guess"></p>
+    <div id="confetti">🎉</div>
+    <div id="trophy">🏆</div>
+
+    <script>
+        const words = ["eksempel", "utfordring", "kode", "programmering", "oppgave"];
+        const today = new Date().toISOString().split('T')[0];
+        const wordOfTheDay = words[new Date().getDay() % words.length];
+        document.getElementById('date-time').innerText = `Dato: ${today}, Tid: ${new Date().toLocaleTimeString()}`;
+
+        function calculateSimilarity(word1, word2) {
+            let matches = 0;
+            for (let i = 0; i < Math.min(word1.length, word2.length); i++) {
+                if (word1[i] === word2[i]) {
+                    matches++;
+                }
+            }
+            return Math.floor((matches / word2.length) * 100);
+        }
+
+        function makeGuess() {
+            const guess = document.getElementById('guess-input').value.toLowerCase();
+            if (guess === wordOfTheDay) {
+                document.getElementById('feedback').innerText = "Gratulerer! Du gjettet riktig ord!";
+                document.getElementById('confetti').style.display = 'block';
+                document.getElementById('trophy').style.display = 'block';
+                document.getElementById('last-guess').innerText = `Riktig ord: ${wordOfTheDay}`;
+            } else {
+                const similarity = calculateSimilarity(guess, wordOfTheDay);
+                document.getElementById('feedback').innerText = `Du er ${similarity}% nærme riktig ord.`;
+                document.getElementById('last-guess').innerText = `Siste gjetning: ${guess}`;
+                document.getElementById('confetti').style.display = 'none';
+                document.getElementById('trophy').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
