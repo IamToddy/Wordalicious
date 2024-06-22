@@ -27,10 +27,20 @@
     <div id="trophy">🏆</div>
 
     <script>
-        const words = ["eksempel", "utfordring", "kode", "programmering", "oppgave"];
+        let wordOfTheDay = '';
         const today = new Date().toISOString().split('T')[0];
-        const wordOfTheDay = words[new Date().getDay() % words.length];
         document.getElementById('date-time').innerText = `Dato: ${today}, Tid: ${new Date().toLocaleTimeString()}`;
+
+        async function fetchWordOfTheDay() {
+            try {
+                const response = await fetch('https://random-word-api.herokuapp.com/word?number=1');
+                const data = await response.json();
+                wordOfTheDay = data[0].toLowerCase();
+            } catch (error) {
+                console.error('Error fetching the word of the day:', error);
+                wordOfTheDay = 'feil'; // Fallback-ord i tilfelle feil
+            }
+        }
 
         function calculateSimilarity(word1, word2) {
             let matches = 0;
@@ -57,6 +67,9 @@
                 document.getElementById('trophy').style.display = 'none';
             }
         }
+
+        // Hent dagens ord når siden lastes
+        fetchWordOfTheDay();
     </script>
 </body>
 </html>
