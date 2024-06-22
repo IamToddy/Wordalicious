@@ -60,7 +60,7 @@
         }
         #guess-count {
             font-size: 1.5em;
-            color: #4682b4; /* Endret til en ny blå farge */
+            color: #4682b4;
         }
         #confetti-canvas {
             position: fixed;
@@ -106,7 +106,13 @@
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        #hint-text, #extra-hint-text {
+        #hint-text {
+            font-size: 2em;
+            background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        #extra-hint-text {
             font-size: 1.5em;
         }
         #version-log {
@@ -305,3 +311,4 @@
 </body>
 </html>
 
+               
