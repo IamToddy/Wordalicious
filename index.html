@@ -179,7 +179,7 @@
                 const text = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
-                const definitionElement = doc.querySelector('.def');
+                const definitionElement = doc.querySelector('.definition');
                 return definitionElement ? definitionElement.textContent.trim() : 'Ingen definisjon tilgjengelig';
             } catch (error) {
                 console.error('Error fetching the definition:', error);
@@ -281,6 +281,8 @@
                 document.getElementById('sad-face').style.display = 'none';
             }
             document.getElementById('guess-count').innerText = `Antall gjetninger: ${attempts}`;
+            closeModal('hint-modal');
+            closeModal('extra-hint-modal');
         }
 
         function showModal(modalId) {
