@@ -9,25 +9,49 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 50px;
+            background-color: #f0f8ff;
         }
         #confetti, #trophy {
             display: none;
         }
+        .feedback {
+            font-size: 1.2em;
+            margin: 20px;
+        }
+        .feedback.red {
+            color: red;
+        }
+        .feedback.yellow {
+            color: yellow;
+        }
+        .feedback.blue {
+            color: blue;
+        }
+        .feedback.dark-green {
+            color: darkgreen;
+        }
+        .feedback.light-green {
+            color: lightgreen;
+        }
     </style>
 </head>
 <body>
-    <h1>Ordgjetting App</h1>
     <p id="date-time"></p>
     <p>Gjett dagens ord:</p>
     <input type="text" id="guess-input" placeholder="Skriv ditt gjetning her">
     <button onclick="makeGuess()">Gjett</button>
-    <p id="feedback"></p>
-    <p id="last-guess"></p>
+    <p id="feedback" class="feedback"></p>
+    <p>Siste gjetning: <span id="last-guess"></span></p>
+    <p>Nærmest gjetning: <span id="closest-guess"></span></p>
+    <p id="hint" style="display:none;">Hint: De to siste bokstavene i ordet er <span id="hint-text"></span></p>
     <div id="confetti">🎉</div>
     <div id="trophy">🏆</div>
 
     <script>
         let wordOfTheDay = '';
+        let attempts = 0;
+        let closestGuess = '';
+        let highestSimilarity = 0;
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date-time').innerText = `Dato: ${today}, Tid: ${new Date().toLocaleTimeString()}`;
 
@@ -54,15 +78,38 @@
 
         function makeGuess() {
             const guess = document.getElementById('guess-input').value.toLowerCase();
+            attempts++;
+            const similarity = calculateSimilarity(guess, wordOfTheDay);
+
             if (guess === wordOfTheDay) {
                 document.getElementById('feedback').innerText = "Gratulerer! Du gjettet riktig ord!";
+                document.getElementById('feedback').className = 'feedback light-green';
                 document.getElementById('confetti').style.display = 'block';
                 document.getElementById('trophy').style.display = 'block';
-                document.getElementById('last-guess').innerText = `Riktig ord: ${wordOfTheDay}`;
+                document.getElementById('last-guess').innerText = guess;
+                document.getElementById('closest-guess').innerText = guess;
             } else {
-                const similarity = calculateSimilarity(guess, wordOfTheDay);
+                document.getElementById('last-guess').innerText = guess;
+                if (similarity > highestSimilarity) {
+                    highestSimilarity = similarity;
+                    closestGuess = guess;
+                }
+                document.getElementById('closest-guess').innerText = closestGuess;
+
+                let feedbackClass = '';
+                if (similarity < 10) feedbackClass = 'red';
+                else if (similarity <= 50) feedbackClass = 'yellow';
+                else if (similarity <= 90) feedbackClass = 'blue';
+                else if (similarity < 100) feedbackClass = 'dark-green';
+                
                 document.getElementById('feedback').innerText = `Du er ${similarity}% nærme riktig ord.`;
-                document.getElementById('last-guess').innerText = `Siste gjetning: ${guess}`;
+                document.getElementById('feedback').className = `feedback ${feedbackClass}`;
+
+                if (attempts >= 20) {
+                    document.getElementById('hint').style.display = 'block';
+                    document.getElementById('hint-text').innerText = wordOfTheDay.slice(-2);
+                }
+
                 document.getElementById('confetti').style.display = 'none';
                 document.getElementById('trophy').style.display = 'none';
             }
