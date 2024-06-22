@@ -211,6 +211,7 @@
             }
 
             const guess = document.getElementById('guess-input').value.toLowerCase();
+            if (!guess) return;  // Hindre tomme gjetninger
             attempts++;
             document.getElementById('guess-input').value = '';
             const similarity = calculateSimilarity(guess, wordOfTheDay);
@@ -278,3 +279,4 @@
     <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
 </html>
+
