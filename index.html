@@ -108,21 +108,18 @@
         let attempts = 0;
         let closestGuess = '';
         let highestSimilarity = 0;
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date-time').innerText = `Dato: ${today}, Tid: ${new Date().toLocaleTimeString()}`;
-
-        async function fetchWordOfTheDay() {
-            try {
-                const response = await fetch('https://random-word-api.herokuapp.com/word?number=1');
-                const data = await response.json();
-                wordOfTheDay = data[0].toLowerCase();
-                document.getElementById('language').innerText = `Språk: Engelsk`;
-            } catch (error) {
-                console.error('Error fetching the word of the day:', error);
-                wordOfTheDay = 'feil'; // Fallback-ord i tilfelle feil
-                document.getElementById('language').innerText = `Språk: Ikke tilgjengelig`;
-            }
+        const words = ["eksempel", "utfordring", "kode", "programmering", "oppgave", "gjette", "spill", "ord", "data", "nett"];
+        
+        function getWordOfTheDay() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date-time').innerText = `Dato: ${today}, Tid: ${new Date().toLocaleTimeString()}`;
+            const dateHash = new Date(today).getTime();
+            const wordIndex = dateHash % words.length;
+            return words[wordIndex];
         }
+
+        wordOfTheDay = getWordOfTheDay();
+        document.getElementById('language').innerText = `Språk: Engelsk`;
 
         function calculateSimilarity(word1, word2) {
             let matches = 0;
@@ -192,9 +189,6 @@
             }
             document.getElementById('guess-count').innerText = `Antall gjetninger: ${attempts}`;
         }
-
-        // Hent dagens ord når siden lastes
-        fetchWordOfTheDay();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
