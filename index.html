@@ -20,19 +20,19 @@
             font-weight: bold;
         }
         .feedback.red {
-            color: red;
+            color: #e74c3c;
         }
         .feedback.yellow {
-            color: yellow;
+            color: #f1c40f;
         }
         .feedback.blue {
-            color: blue;
+            color: #3498db;
         }
         .feedback.dark-green {
-            color: darkgreen;
+            color: #27ae60;
         }
         .feedback.light-green {
-            color: lightgreen;
+            color: #2ecc71;
         }
         #guess-input {
             font-size: 2em;
@@ -54,7 +54,7 @@
         button:hover {
             background-color: #ff1493;
         }
-        #hint {
+        #hint, #extra-hint {
             font-size: 1.5em;
             color: #ff4500;
         }
@@ -85,6 +85,14 @@
             50% { transform: scale(1.5); }
             100% { transform: scale(1); }
         }
+        .guess-list {
+            list-style-type: none;
+            padding: 0;
+            font-size: 1.2em;
+        }
+        .guess-list li {
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -95,9 +103,11 @@
     <p id="feedback" class="feedback"></p>
     <p>Siste gjetning: <span id="last-guess"></span></p>
     <p>Nærmest gjetning: <span id="closest-guess"></span></p>
+    <ul id="guess-list" class="guess-list"></ul>
     <p id="language"></p>
     <p id="guess-count">Antall gjetninger: 0</p>
     <p id="hint" style="display:none;">Hint: De to siste bokstavene i ordet er <span id="hint-text"></span></p>
+    <p id="extra-hint" style="display:none;">Betydning på norsk: <span id="extra-hint-text"></span></p>
     <div id="confetti">🎉</div>
     <div id="trophy" class="pulsing">🏆</div>
     <div id="sad-face">😞</div>
@@ -108,7 +118,20 @@
         let attempts = 0;
         let closestGuess = '';
         let highestSimilarity = 0;
+        let guesses = [];
         const words = ["eksempel", "utfordring", "kode", "programmering", "oppgave", "gjette", "spill", "ord", "data", "nett"];
+        const wordDefinitions = {
+            "eksempel": "eksempel (en) - et representativt form eller mønster",
+            "utfordring": "utfordring (en) - en oppgave eller situasjon som tester noen ferdigheter",
+            "kode": "kode (en) - et system av ord, bokstaver eller symboler brukt til å representere andre, spesielt for hemmelighold",
+            "programmering": "programmering (en) - prosessen med å skrive dataprogrammer",
+            "oppgave": "oppgave (en) - et stykke arbeid som skal utføres eller gjennomføres",
+            "gjette": "gjette (v) - å danne en mening eller estimat om (noe) fra lite eller ingen bevis",
+            "spill": "spill (et) - en aktivitet som man engasjerer seg i for underholdning eller moro",
+            "ord": "ord (et) - et enkelt, distinkt meningsfullt element av tale eller skrift",
+            "data": "data (en) - fakta og statistikk samlet sammen for referanse eller analyse",
+            "nett": "nett (et) - et datanettverk; internett"
+        };
         
         function getWordOfTheDay() {
             const today = new Date().toISOString().split('T')[0];
@@ -140,10 +163,24 @@
             }, 5000);
         }
 
+        function updateGuessList() {
+            const guessList = document.getElementById('guess-list');
+            guessList.innerHTML = '';
+            guesses.sort((a, b) => b.similarity - a.similarity);
+            guesses.slice(0, 10).forEach(guess => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${guess.word}: ${guess.similarity}%`;
+                guessList.appendChild(listItem);
+            });
+        }
+
         function makeGuess() {
             const guess = document.getElementById('guess-input').value.toLowerCase();
             attempts++;
             const similarity = calculateSimilarity(guess, wordOfTheDay);
+
+            guesses.push({ word: guess, similarity });
+            updateGuessList();
 
             if (guess === wordOfTheDay) {
                 document.body.classList.add('blinking');
@@ -183,12 +220,22 @@
                     document.getElementById('hint-text').innerText = wordOfTheDay.slice(-2);
                 }
 
+                if (attempts >= 50) {
+                    document.getElementById('extra-hint').style.display = 'block';
+                    document.getElementById('extra-hint-text').innerText = wordDefinitions[wordOfTheDay];
+                }
+
                 document.getElementById('confetti').style.display = 'none';
                 document.getElementById('trophy').style.display = 'none';
                 document.getElementById('sad-face').style.display = 'none';
             }
             document.getElementById('guess-count').innerText = `Antall gjetninger: ${attempts}`;
         }
+
+        // Hent dagens ord når siden lastes
+        wordOfTheDay = getWordOfTheDay();
+        document.getElementById('language').innerText = `Språk: Engelsk`;
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
