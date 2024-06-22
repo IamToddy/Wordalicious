@@ -219,6 +219,9 @@
             guesses.push({ word: guess, similarity });
             updateGuessList();
 
+            document.getElementById('guess-count').innerText = `Antall gjetninger: ${attempts}`;
+            document.getElementById('guess-count').style.color = '#4682b4'; // Ny blå farge
+
             if (guess === wordOfTheDay) {
                 document.body.classList.add('blinking');
                 document.getElementById('feedback').innerText = `Gratulerer! Du gjettet riktig ord! Ordet var ${wordOfTheDay}`;
