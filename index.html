@@ -98,7 +98,7 @@
 <body>
     <p id="date-time"></p>
     <p>Gjett dagens ord:</p>
-    <input type="text" id="guess-input" placeholder="Skriv ditt gjetning her">
+    <input type="text" id="guess-input" placeholder="Skriv ditt gjetning her" onkeypress="if(event.key === 'Enter') makeGuess()">
     <button onclick="makeGuess()">Gjett</button>
     <p id="feedback" class="feedback"></p>
     <p>Siste gjetning: <span id="last-guess"></span></p>
@@ -119,9 +119,7 @@
         let closestGuess = '';
         let highestSimilarity = 0;
         let guesses = [];
-        const words = ["eksempel", "utfordring", "kode", "programmering", "oppgave", "gjette", "spill", "ord", "data", "nett"];
         const wordDefinitions = {
-            "eksempel": "eksempel (en) - et representativt form eller mønster",
             "utfordring": "utfordring (en) - en oppgave eller situasjon som tester noen ferdigheter",
             "kode": "kode (en) - et system av ord, bokstaver eller symboler brukt til å representere andre, spesielt for hemmelighold",
             "programmering": "programmering (en) - prosessen med å skrive dataprogrammer",
@@ -132,17 +130,20 @@
             "data": "data (en) - fakta og statistikk samlet sammen for referanse eller analyse",
             "nett": "nett (et) - et datanettverk; internett"
         };
-        
-        function getWordOfTheDay() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date-time').innerText = `Dato: ${today}, Tid: ${new Date().toLocaleTimeString()}`;
-            const dateHash = new Date(today).getTime();
-            const wordIndex = dateHash % words.length;
-            return words[wordIndex];
-        }
 
-        wordOfTheDay = getWordOfTheDay();
-        document.getElementById('language').innerText = `Språk: Engelsk`;
+        async function fetchWordOfTheDay() {
+            try {
+                const response = await fetch('https://lesekloden.no/dagens-ord/');
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const wordElement = doc.querySelector('.word-of-the-day');
+                return wordElement ? wordElement.textContent.trim().toLowerCase() : 'feil';
+            } catch (error) {
+                console.error('Error fetching the word of the day:', error);
+                return 'feil'; // Fallback-ord i tilfelle feil
+            }
+        }
 
         function calculateSimilarity(word1, word2) {
             let matches = 0;
@@ -174,9 +175,15 @@
             });
         }
 
-        function makeGuess() {
+        async function makeGuess() {
+            if (!wordOfTheDay) {
+                wordOfTheDay = await fetchWordOfTheDay();
+                document.getElementById('language').innerText = `Språk: Norsk`;
+            }
+
             const guess = document.getElementById('guess-input').value.toLowerCase();
             attempts++;
+            document.getElementById('guess-input').value = '';
             const similarity = calculateSimilarity(guess, wordOfTheDay);
 
             guesses.push({ word: guess, similarity });
@@ -206,12 +213,12 @@
                 }
                 document.getElementById('closest-guess').innerText = closestGuess;
 
-                let feedbackClass = '';
+                                let feedbackClass = '';
                 if (similarity < 10) feedbackClass = 'red';
                 else if (similarity <= 50) feedbackClass = 'yellow';
                 else if (similarity <= 90) feedbackClass = 'blue';
                 else if (similarity < 100) feedbackClass = 'dark-green';
-                
+
                 document.getElementById('feedback').innerText = `Du er ${similarity}% nærme riktig ord.`;
                 document.getElementById('feedback').className = `feedback ${feedbackClass}`;
 
@@ -233,10 +240,12 @@
         }
 
         // Hent dagens ord når siden lastes
-        wordOfTheDay = getWordOfTheDay();
-        document.getElementById('language').innerText = `Språk: Engelsk`;
-
+        wordOfTheDay = fetchWordOfTheDay().then((word) => {
+            wordOfTheDay = word;
+            document.getElementById('language').innerText = `Språk: Norsk`;
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
 </html>
+
