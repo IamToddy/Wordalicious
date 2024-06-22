@@ -122,7 +122,7 @@
     </style>
 </head>
 <body>
-    <div id="version-log">Versjon 7</div>
+    <div id="version-log">Versjon 8</div>
     <p id="date-time"></p>
     <p>Gjett dagens ord:</p>
     <input type="text" id="guess-input" placeholder="Skriv ditt gjetning her" onkeypress="if(event.key === 'Enter') makeGuess()">
@@ -244,7 +244,7 @@
                 setTimeout(() => {
                     document.body.classList.remove('blinking');
                 }, 2000);
-             } else if (attempts >= 100) {
+            } else if (attempts >= 100) {
                 document.getElementById('feedback').innerText = `Ordet var ${wordOfTheDay}`;
                 document.getElementById('feedback').className = 'feedback';
                 document.getElementById('confetti').style.display = 'none';
@@ -304,4 +304,4 @@
     <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
 </html>
- 
+
