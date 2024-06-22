@@ -115,21 +115,11 @@
 
     <script>
         let wordOfTheDay = '';
+        let definitionOfTheDay = '';
         let attempts = 0;
         let closestGuess = '';
         let highestSimilarity = 0;
         let guesses = [];
-        const wordDefinitions = {
-            "utfordring": "utfordring (en) - en oppgave eller situasjon som tester noen ferdigheter",
-            "kode": "kode (en) - et system av ord, bokstaver eller symboler brukt til å representere andre, spesielt for hemmelighold",
-            "programmering": "programmering (en) - prosessen med å skrive dataprogrammer",
-            "oppgave": "oppgave (en) - et stykke arbeid som skal utføres eller gjennomføres",
-            "gjette": "gjette (v) - å danne en mening eller estimat om (noe) fra lite eller ingen bevis",
-            "spill": "spill (et) - en aktivitet som man engasjerer seg i for underholdning eller moro",
-            "ord": "ord (et) - et enkelt, distinkt meningsfullt element av tale eller skrift",
-            "data": "data (en) - fakta og statistikk samlet sammen for referanse eller analyse",
-            "nett": "nett (et) - et datanettverk; internett"
-        };
 
         async function fetchWordOfTheDay() {
             try {
@@ -138,10 +128,14 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const wordElement = doc.querySelector('.word-of-the-day');
-                return wordElement ? wordElement.textContent.trim().toLowerCase() : 'feil';
+                const definitionElement = doc.querySelector('.definition-of-the-day');
+                return {
+                    word: wordElement ? wordElement.textContent.trim().toLowerCase() : 'feil',
+                    definition: definitionElement ? definitionElement.textContent.trim() : 'Ingen definisjon tilgjengelig'
+                };
             } catch (error) {
                 console.error('Error fetching the word of the day:', error);
-                return 'feil'; // Fallback-ord i tilfelle feil
+                return { word: 'feil', definition: 'Ingen definisjon tilgjengelig' };
             }
         }
 
@@ -177,7 +171,9 @@
 
         async function makeGuess() {
             if (!wordOfTheDay) {
-                wordOfTheDay = await fetchWordOfTheDay();
+                const wordData = await fetchWordOfTheDay();
+                wordOfTheDay = wordData.word;
+                definitionOfTheDay = wordData.definition;
                 document.getElementById('language').innerText = `Språk: Norsk`;
             }
 
@@ -213,14 +209,14 @@
                 }
                 document.getElementById('closest-guess').innerText = closestGuess;
 
-                                let feedbackClass = '';
+                let feedbackClass = '';
                 if (similarity < 10) feedbackClass = 'red';
                 else if (similarity <= 50) feedbackClass = 'yellow';
                 else if (similarity <= 90) feedbackClass = 'blue';
                 else if (similarity < 100) feedbackClass = 'dark-green';
 
                 document.getElementById('feedback').innerText = `Du er ${similarity}% nærme riktig ord.`;
-                document.getElementById('feedback').className = `feedback ${feedbackClass}`;
+                                document.getElementById('feedback').className = `feedback ${feedbackClass}`;
 
                 if (attempts >= 20) {
                     document.getElementById('hint').style.display = 'block';
@@ -229,7 +225,7 @@
 
                 if (attempts >= 50) {
                     document.getElementById('extra-hint').style.display = 'block';
-                    document.getElementById('extra-hint-text').innerText = wordDefinitions[wordOfTheDay];
+                    document.getElementById('extra-hint-text').innerText = definitionOfTheDay;
                 }
 
                 document.getElementById('confetti').style.display = 'none';
@@ -240,8 +236,9 @@
         }
 
         // Hent dagens ord når siden lastes
-        wordOfTheDay = fetchWordOfTheDay().then((word) => {
-            wordOfTheDay = word;
+        fetchWordOfTheDay().then((wordData) => {
+            wordOfTheDay = wordData.word;
+            definitionOfTheDay = wordData.definition;
             document.getElementById('language').innerText = `Språk: Norsk`;
         });
     </script>
