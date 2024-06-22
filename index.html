@@ -6,7 +6,7 @@
     <title>Ordgjetting App</title>
     <style>
         body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
             margin: 50px;
             background-color: #f0f8ff;
@@ -20,19 +20,19 @@
             font-weight: bold;
         }
         .feedback.red {
-            color: #e74c3c;
+            color: #ff6347;
         }
         .feedback.yellow {
-            color: #f1c40f;
+            color: #ffd700;
         }
         .feedback.blue {
-            color: #3498db;
+            color: #1e90ff;
         }
         .feedback.dark-green {
-            color: #27ae60;
+            color: #006400;
         }
         .feedback.light-green {
-            color: #2ecc71;
+            color: #00ff7f;
         }
         #guess-input {
             font-size: 2em;
@@ -88,10 +88,37 @@
         .guess-list {
             list-style-type: none;
             padding: 0;
-            font-size: 1.2em;
+            font-size: 1em;
         }
         .guess-list li {
-            padding: 5px;
+            padding: 3px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .modal-header {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .modal-content {
+            font-size: 1.2em;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5em;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -106,12 +133,21 @@
     <ul id="guess-list" class="guess-list"></ul>
     <p id="language"></p>
     <p id="guess-count">Antall gjetninger: 0</p>
-    <p id="hint" style="display:none;">Hint: De to siste bokstavene i ordet er <span id="hint-text"></span></p>
-    <p id="extra-hint" style="display:none;">Betydning på norsk: <span id="extra-hint-text"></span></p>
     <div id="confetti">🎉</div>
     <div id="trophy" class="pulsing">🏆</div>
     <div id="sad-face">😞</div>
     <canvas id="confetti-canvas"></canvas>
+
+    <div id="hint-modal" class="modal">
+        <span class="modal-close" onclick="closeModal('hint-modal')">&times;</span>
+        <div class="modal-header">Hint</div>
+        <div class="modal-content" id="hint-text"></div>
+    </div>
+    <div id="extra-hint-modal" class="modal">
+        <span class="modal-close" onclick="closeModal('extra-hint-modal')">&times;</span>
+        <div class="modal-header">Betydning</div>
+        <div class="modal-content" id="extra-hint-text"></div>
+    </div>
 
     <script>
         let wordOfTheDay = '';
@@ -128,14 +164,26 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
                 const wordElement = doc.querySelector('.word-of-the-day');
-                const definitionElement = doc.querySelector('.definition-of-the-day');
-                return {
-                    word: wordElement ? wordElement.textContent.trim().toLowerCase() : 'feil',
-                    definition: definitionElement ? definitionElement.textContent.trim() : 'Ingen definisjon tilgjengelig'
-                };
+                const word = wordElement ? wordElement.textContent.trim().toLowerCase() : 'feil';
+                const definition = await fetchDefinition(word);
+                return { word, definition };
             } catch (error) {
                 console.error('Error fetching the word of the day:', error);
                 return { word: 'feil', definition: 'Ingen definisjon tilgjengelig' };
+            }
+        }
+
+        async function fetchDefinition(word) {
+            try {
+                const response = await fetch(`https://ordbokene.no/bm,nn/search?lang=bm&phrase=${word}`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const definitionElement = doc.querySelector('.def');
+                return definitionElement ? definitionElement.textContent.trim() : 'Ingen definisjon tilgjengelig';
+            } catch (error) {
+                console.error('Error fetching the definition:', error);
+                return 'Ingen definisjon tilgjengelig';
             }
         }
 
@@ -193,7 +241,8 @@
                 document.getElementById('trophy').style.display = 'block';
                 triggerConfetti();
                 setTimeout(() => {
-                    document.body.classList.remove('blinking');
+                    document.body.classList.remove('
+blinking');
                 }, 2000);
             } else if (attempts >= 100) {
                 document.getElementById('feedback').innerText = `Ordet var ${wordOfTheDay}`;
@@ -216,16 +265,16 @@
                 else if (similarity < 100) feedbackClass = 'dark-green';
 
                 document.getElementById('feedback').innerText = `Du er ${similarity}% nærme riktig ord.`;
-                                document.getElementById('feedback').className = `feedback ${feedbackClass}`;
+                document.getElementById('feedback').className = `feedback ${feedbackClass}`;
 
                 if (attempts >= 20) {
-                    document.getElementById('hint').style.display = 'block';
                     document.getElementById('hint-text').innerText = wordOfTheDay.slice(-2);
+                    showModal('hint-modal');
                 }
 
                 if (attempts >= 50) {
-                    document.getElementById('extra-hint').style.display = 'block';
                     document.getElementById('extra-hint-text').innerText = definitionOfTheDay;
+                    showModal('extra-hint-modal');
                 }
 
                 document.getElementById('confetti').style.display = 'none';
@@ -233,6 +282,14 @@
                 document.getElementById('sad-face').style.display = 'none';
             }
             document.getElementById('guess-count').innerText = `Antall gjetninger: ${attempts}`;
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         // Hent dagens ord når siden lastes
@@ -245,4 +302,3 @@
     <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
 </html>
-
